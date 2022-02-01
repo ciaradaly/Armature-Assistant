@@ -12,11 +12,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 bl_info = {
-    "name" : "newModifier",
+    "name" : "Blender UI plugin",
     "author" : "Ciara Daly",
     "description" : "",
     "blender" : (2, 80, 0),
-    "version" : (0, 0, 1),
+    "version" : (0, 0, 2),
     "location" : "View3D",
     "warning" : "",
     "category" : "Object"
@@ -24,10 +24,10 @@ bl_info = {
 
 import bpy
 
-from . plugin_op import CD_OT_Apply_All_Op, CD_OT_Cancel_All_Op
-from . plugin_pnl import CD_PT_PANEL
+from . plugin_op import ButtonOperator
+from . plugin_pnl import OBJECT_PT_MyPanel
 
-classes = (CD_OT_Apply_All_Op, CD_PT_PANEL, CD_OT_Cancel_All_Op)
+classes = (ButtonOperator, OBJECT_PT_MyPanel)
 def register():
     for c  in classes:
         bpy.utils.register_class(c)

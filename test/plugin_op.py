@@ -1,53 +1,42 @@
 import bpy
 
 from bpy.types import Operator
+from bpy.props import EnumProperty
 
-class CD_OT_Apply_All_Op(Operator):
-    bl_idname = "object.apply_all_mods"
-    bl_label = "Apply all"
-    bl_description = "Apply all operators of the active object"
-
-    @classmethod
-    def poll(cls, context):
-        obj = context.object
-
-        if obj is not None:
-            if obj.mode == "OBJECT":
-                return True
-
-        return False
-
+#Operates button functionalities on UI panel
+class ButtonOperator(Operator):
+    bl_idname = "object.button_operator"
+    bl_label = "Button"
+    action: EnumProperty(
+        items=[
+            ('LOCATION', 'change location', 'change location'),
+            ('CHANGE_VIEW', 'change viewport', 'change viewport')
+        ]
+    )
     def execute(self, context):
-        
-        # Apply all modifiers of active object
-        active_obj = context.view_layer.objects.active
-
-        for mod in active_obj.modifiers:
-            bpy.ops.object.modifier_apply(modifier=mod.name)
-
+        if self.action == 'LOCATION':
+            self.change_location(context=context)
+        if self.action == 'CHANGE_VIEW':
+            self.change_viewport(context=context)
         return {'FINISHED'}
 
+    @staticmethod
+    def change_location(context):
+        bpy.context.active_object.location = (0, 0, 0)
+        return {'FINISHED'}
 
-class CD_OT_Cancel_All_Op(Operator):
-    bl_idname = "object.cancel_all_mods"
-    bl_label = "Cancel all"
-    bl_description = "Cancel all operators of the active object"
-
-    @classmethod
-    def poll(cls, context):
-        obj = context.object
-
-        if obj is not None:
-            if obj.mode == "OBJECT":
-                return True
-
-        return False
-
-    def execute(self, context):
-        
-        # Apply all modifiers of active object
-        active_obj = context.view_layer.objects.active
-
-        active_obj.modifiers.clear()
-
+# class ChangeViewpointOperator(Operator):
+#     bl_idname = "object.button_operator"
+#     bl_label = "Test"
+    @staticmethod
+    def change_viewport(context):
+        for area in bpy.context.screen.areas:
+            if area.type == 'VIEW_3D': 
+                ctx = {
+                    "window": bpy.context.window, # Only change on window currently open
+                    "area": area, # our 3D View (the first found only actually)
+                    "region": None # just to suppress PyContext warning, doesn't seem to have any effect
+                }
+                bpy.ops.view3d.view_axis(type='LEFT', align_active=False)
+                bpy.context.space_data.region_3d.update()
         return {'FINISHED'}
