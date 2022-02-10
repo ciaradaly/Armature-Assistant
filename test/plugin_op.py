@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 import bpy
 
 from bpy.types import Operator
@@ -11,7 +12,8 @@ class ButtonOperator(Operator):
         items=[
             ('LOCATION', 'change location', 'change location'),
             ('CHANGE_VIEW', 'change viewport', 'change viewport'),
-            ('CONVERT_BONES', 'convert to armature', 'convert to armature')
+            ('CONVERT_BONES', 'convert to armature', 'convert to armature'),
+            ('BEZIER_SPAWN', 'spawn a straight bezier curve', 'spawn a straight bezier curve')
         ]
     )
     def execute(self, context):
@@ -21,6 +23,8 @@ class ButtonOperator(Operator):
             self.change_viewport(context=context)
         if self.action == 'CONVERT_BONES':
             self.bone_creator(context=context)
+        if self.action == 'BEZIER_SPAWN':
+            self.bezier_spawn(context=context)
         return {'FINISHED'}
 
     @staticmethod
@@ -32,14 +36,24 @@ class ButtonOperator(Operator):
     def change_viewport(context):
         for area in bpy.context.screen.areas:
             if area.type == 'VIEW_3D': 
-                #TBI: look from z, x and y axis by pressing button
-                #check https://docs.blender.org/api/current/bpy.ops.view3d.html
                 ctx = {
                     "window": bpy.context.window, 
                     "area": area, # Only change on window currently open
                 }
                 bpy.ops.view3d.view_axis(ctx, type='RIGHT', align_active=False)
                 bpy.context.space_data.region_3d.update()
+        return {'FINISHED'}
+
+    @staticmethod
+    def bezier_spawn(context):
+        bpy.ops.curve.primitive_bezier_curve_add(enter_editmode=True,scale=(0, 0, 0))
+        bpy.ops.object.mode_set(mode='EDIT')
+        # bpy.ops.object.select_all(action='DESELECT')
+        # bezier_curves = bpy.context.view_layer.objects.active
+        #https://blender.stackexchange.com/questions/145857/how-do-i-apply-delta-transforms-to-normal-transform
+        for obj in bpy.context.selected_objects:
+            obj.delta_scale = (1,0,1)
+        bpy.ops.object.mode_set(mode='OBJECT')
         return {'FINISHED'}
 
     @staticmethod
@@ -70,5 +84,3 @@ class ButtonOperator(Operator):
             #https://www.youtube.com/watch?v=mGsRmAq9mNU&ab_channel=StevenScott
 
         return {'FINISHED'}
-
-
