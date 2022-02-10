@@ -4,7 +4,6 @@ from bpy.types import Panel
 
 from . plugin_op import ButtonOperator
 
-
 class OBJECT_PT_MyPanel(Panel):
     bl_idname = "object.my_panel"
     bl_label = "Armature Assistant"
@@ -13,8 +12,6 @@ class OBJECT_PT_MyPanel(Panel):
     bl_category = "Blender Plugin"
     bl_context = "objectmode"
 
-    bpy.types.Scene.MyInt = bpy.props.IntProperty(name='MyInt', description="Amount of Bones", min=0, max=100, default=1)
-    
     @classmethod
     def poll(self,context):
         return context.object is not None
@@ -22,10 +19,10 @@ class OBJECT_PT_MyPanel(Panel):
     
     def draw(self, context):
         layout = self.layout # .operator("scene.button_operator")
-        layout.operator('object.button_operator', text="Move to Center", icon="CONSOLE").action='LOCATION'
+        layout.operator('object.button_operator', text="Add new Bezier Curve", icon="CURVE_BEZCURVE").action='BEZIER_SPAWN'
+        layout.operator('object.button_operator', text="Move to Center", icon="GRID").action='LOCATION'
         layout.operator('object.button_operator', text="Change ViewPoint", icon="CONSOLE").action='CHANGE_VIEW'
         layout.operator('object.button_operator', text="Bone converter", icon="CONSOLE").action='CONVERT_BONES'
-
         layout.prop(bpy.context.scene, "MyInt", slider=True)
         # obj = bpy.context.selected_objects
         # row = layout.row()
