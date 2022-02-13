@@ -12,7 +12,9 @@ class ButtonOperator(Operator):
     action: EnumProperty(
         items=[
             ('LOCATION', 'change location', 'change location'),
-            ('CHANGE_VIEW', 'change viewport', 'change viewport'),
+            ('VIEW_TOP', 'view top', 'view top'),
+            ('VIEW_SIDE', 'view side', 'view side'),
+            ('VIEW_FRONT', 'view front', 'view front'),
             ('CONVERT_BONES', 'convert to armature', 'convert to armature'),
             ('BEZIER_SPAWN', 'spawn a straight bezier curve', 'spawn a straight bezier curve'),
             ('BONE_FREQ', 'change bone frequency', 'change bone frequency')
@@ -21,8 +23,12 @@ class ButtonOperator(Operator):
     def execute(self, context):
         if self.action == 'LOCATION':
             self.change_location(context=context)
-        if self.action == 'CHANGE_VIEW':
-            self.change_viewport(context=context)
+        if self.action == 'VIEW_TOP':
+            self.change_view(view="TOP")
+        if self.action == 'VIEW_SIDE':
+            self.change_view(view="FRONT")
+        if self.action == 'VIEW_FRONT':
+            self.change_view(view="RIGHT")
         if self.action == 'CONVERT_BONES':
             self.bone_creator(context=context)
         if self.action == 'BEZIER_SPAWN':
@@ -37,14 +43,14 @@ class ButtonOperator(Operator):
         return {'FINISHED'}
         
     @staticmethod
-    def change_viewport(context):
+    def change_view(view):
         for area in bpy.context.screen.areas:
             if area.type == 'VIEW_3D': 
                 ctx = {
                     "window": bpy.context.window, 
                     "area": area, # Only change on window currently open
                 }
-                bpy.ops.view3d.view_axis(ctx, type='RIGHT', align_active=False)
+                bpy.ops.view3d.view_axis(ctx, type=view, align_active=False)
                 bpy.context.space_data.region_3d.update()
         return {'FINISHED'}
 
@@ -83,9 +89,6 @@ class ButtonOperator(Operator):
             bpy.ops.object.mode_set(mode='EDIT')
             bpy.ops.armature.select_all(action='SELECT')
             bpy.ops.armature.dissolve()
-            # bpy.ops.armature.subdivide()
-            # bpy.ops.armature.select_all(action='SELECT')
-            # bpy.ops.armature.subdivide()
             bpy.context.space_data.region_3d.update()
             bpy.ops.object.mode_set(mode='POSE') 
             # https://github.com/amasawarasen/AmasawaTools/blob/master/amasawaTools_1_5_4.py
