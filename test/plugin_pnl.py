@@ -25,7 +25,9 @@ class OBJECT_PT_MyPanel(Panel):
         
         layout.operator('object.button_operator', text="Add new Bezier Curve", icon="CURVE_BEZCURVE").action='BEZIER_SPAWN'
         layout.operator('object.button_operator', text="Move to Center", icon="GRID").action='LOCATION'
-        layout.operator('object.button_operator', text="Change ViewPoint", icon="CONSOLE").action='CHANGE_VIEW'
+        layout.operator('object.button_operator', text="Top", icon="CONSOLE").action='VIEW_TOP'
+        layout.operator('object.button_operator', text="Side", icon="CONSOLE").action='VIEW_SIDE'
+        layout.operator('object.button_operator', text="Front", icon="CONSOLE").action='VIEW_FRONT'
         layout.operator('object.button_operator', text="Bone converter", icon="CONSOLE").action='CONVERT_BONES'
         layout.prop(context.scene, 'MyInt', slider=True)
         layout.operator('object.button_operator', text="Change Frequency", icon="CONSOLE").action='BONE_FREQ'
