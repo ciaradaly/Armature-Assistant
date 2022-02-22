@@ -25,9 +25,9 @@ bl_info = {
 import bpy
 
 from . plugin_op import ButtonOperator
-from . plugin_pnl import OBJECT_PT_MyPanel
+from . plugin_pnl import OBJECT_PT_ArmatureAssistantPanel, OBJECT_PT_InfoPanel
 
-classes = (ButtonOperator, OBJECT_PT_MyPanel)
+classes = (ButtonOperator, OBJECT_PT_ArmatureAssistantPanel, OBJECT_PT_InfoPanel)
 def register():
     for c  in classes:
         bpy.utils.register_class(c)
