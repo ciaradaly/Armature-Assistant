@@ -31,7 +31,7 @@ class OBJECT_PT_ArmatureAssistantPanel(BASE_panel, Panel):
 
     def draw(self, context):
         
-        layout = self.layout # .operator("scene.button_operator")
+        layout = self.layout 
         #layout.prop(context.scene, "MyInt", slider=True)
         
         layout.operator('object.button_operator', text="Add new Bezier Curve", icon="CURVE_BEZCURVE").action='BEZIER_SPAWN'
@@ -48,16 +48,8 @@ class OBJECT_PT_ArmatureAssistantPanel(BASE_panel, Panel):
         layout.operator('object.button_operator', text="Change Frequency", icon="GROUP_BONE").action='BONE_FREQ'
         layout.label(text="Select mesh and bone to rig:")
         layout.operator('object.button_operator', text="Rig", icon="ARMATURE_DATA").action='AUTO_RIG'
-
-        
-        # row = layout.row()
-        # col = row.column(align=True)
-        # layout.label(text="Location adjustment:")
-        # # col.label(text = str(obj.location))
-        # col = layout.column(align=True)
-        # col.operator(ButtonOperator.bl_idname, text="Change Location", icon="CONSOLE")
-        
-        # col.operator(ChangeViewpointOperator.bl_idname, text="Change ViewPoint", icon="CONSOLE")
+        # layout.prop(bpy.context.scene, "local_view")
+        # layout.operator(ButtonOperator.bl_idname, text="Change Location", icon="CONSOLE")
 
 class OBJECT_PT_InfoPanel(BASE_panel, Panel):
     bl_parent_id = "OBJECT_PT_ArmatureAssistantPanel"

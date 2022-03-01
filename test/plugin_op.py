@@ -1,6 +1,11 @@
 from distutils.log import error
 from os import stat
 import bpy
+import mathutils
+import numpy as np
+import math
+
+from mathutils import Vector
 
 from bpy.types import Operator
 from bpy.props import EnumProperty
@@ -12,6 +17,26 @@ def ShowMessageBox(message = "", title = "Message Box", icon = 'INFO'):
 
     bpy.context.window_manager.popup_menu(draw, title = title, icon = icon)
 
+#Singular value decomposition
+#https://stackoverflow.com/questions/2298390/fitting-a-line-in-3d
+def calculate_scd(mesh):
+    vec = [(mesh.matrix_world @ v.co) for v in mesh.data.vertices]
+    f = np.zeros((3,len(vec)))
+    for j in range(3):
+        for i in range(len(vec)):
+            if j == 0:
+                f[j][i] = mathutils.Vector(vec[i]).x
+            if j == 1:
+                f[j][i] = mathutils.Vector(vec[i]).y
+            if j == 2:
+                f[j][i] = mathutils.Vector(vec[i]).z
+    data = np.concatenate((f[0][:, np.newaxis], f[1][:, np.newaxis], f[2][:, np.newaxis]), axis=1)
+    datamean = np.average(data, axis=0)
+    uu, dd, vv = np.linalg.svd(data - datamean)
+    linepts = vv[0] * np.mgrid[-6:6:2j][:, np.newaxis]
+    linepts += datamean
+    return linepts
+    
 
 #Operates button functionalities on UI panel
 class ButtonOperator(Operator):
@@ -51,10 +76,40 @@ class ButtonOperator(Operator):
 
     @staticmethod
     def change_location(context):
-        bpy.context.active_object.location = (0, 0, 0)
+        #Must have armature and mesh OBJECT selected
+        # Get location of points of mesh and perform
+        for obj in bpy.context.selected_objects:
+            if obj.type != 'MESH':
+                toMove = obj
+            if obj.type == 'MESH':
+                mesh = obj
+        #array filled with vector points
+        # vec = [v.co for v in mesh.data.vertices]
+        vectors = calculate_scd(mesh)
+        # array[0] = mathutils.Vector((linepts[0][0],linepts[0][1],linepts[0][2]))
+        # array[1] = mathutils.Vector((linepts[1][0],linepts[1][1],linepts[1][2]))
+        bpy.ops.object.empty_add(type='PLAIN_AXES')
+        obj = bpy.context.view_layer.objects.active
+        obj.location= mathutils.Vector((vectors[0][0],vectors[0][1],vectors[0][2]))
+        bpy.ops.object.empty_add(type='PLAIN_AXES')
+        obj2 = bpy.context.view_layer.objects.active
+        obj2.location = mathutils.Vector((vectors[1][0],vectors[1][1],vectors[1][2]))
+        
+        # vec = mathutils.Vector(vec[1])
+        # print("vec=%s" % vec[:])
+        
+        # currently is capable of getting center of mass but too simple?
+        # bpy.context.scene.cursor_location = cg_mesh (bpy.context.scene.objects.active
+        # bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
+
+        # bpy.context.view_layer.objects.active = bpy.context.view_layer.objects.get(mesh.name)
+        # toMove.location = cg_mesh(bpy.context.view_layer.objects.active)
+        
+        
         return {'FINISHED'}
         
     @staticmethod
+    #Changes view when pressed
     def change_view(view):
         for area in bpy.context.screen.areas:
             if area.type == 'VIEW_3D': 
@@ -67,6 +122,7 @@ class ButtonOperator(Operator):
         return {'FINISHED'}
 
     @staticmethod
+    #Spawns in a 'Straight' Bezier Curve at position (0,0,0) for ease of manipulation
     def bezier_spawn(context):
         bpy.ops.curve.primitive_bezier_curve_add(enter_editmode=True,scale=(0, 0, 0))
         bpy.ops.object.mode_set(mode='EDIT')
@@ -79,7 +135,7 @@ class ButtonOperator(Operator):
         return {'FINISHED'}
 
     @staticmethod
-
+    #What it says on the tin: creates armature out of a using a bezier curve as a base
     def bone_creator(context):
         try:
             context = bpy.context
@@ -115,23 +171,27 @@ class ButtonOperator(Operator):
                 bpy.context.object.data.bones.active = myPoseBone.bone
                 myPoseBone.bone.select_tail = True
                 bpy.context.space_data.region_3d.update()
+                #Sets the curve as a constraint using Spline IK. This allows the curve to manipulate
+                #The armature. Can increase or decrease the influence if wanted.
                 const = myPoseBone.constraints.new("SPLINE_IK")
                 const.target = curve
                 const.influence = 0.85
                 const.chain_count = len(created_bones.data.bones)
                 bpy.ops.object.mode_set(mode='OBJECT') 
                 bpy.context.view_layer.objects.active = bpy.context.view_layer.objects.get(created_bones.name)
-                #https://www.youtube.com/watch?v=mGsRmAq9mNU&ab_channel=StevenScott
+                #Process based on https://www.youtube.com/watch?v=mGsRmAq9mNU&ab_channel=StevenScott
         except:
                 ShowMessageBox('Please select a curve', "WARNING", 'ERROR')
         return {'FINISHED'}
 
+    #Changes the amount of bones that appear on the curve
     @staticmethod
     def curve_control(self, context):
         props = self.properties
         scene = context.scene
         amount_of_bones = scene.Bones
         obj = bpy.context.view_layer.objects.active
+        #Maybe update this not to require curve? But use curve if its selected.
         if (obj.type == "ARMATURE"):
             created_bones = bpy.context.view_layer.objects.active
             bpy.ops.object.mode_set(mode='EDIT')
@@ -153,8 +213,6 @@ class ButtonOperator(Operator):
                     cst = len(first_bone)
                     if(cst>0):
                         for c in first_bone:
-                            # if first_bone(type='SPLINE_IK'):
-                            #     curve = first_bone.target
                             first_bone.remove(c)
                 
             # bpy.data.objects[created_bones.name].pose.bones['Bone.00'].constraints
@@ -188,4 +246,3 @@ class ButtonOperator(Operator):
         except:
             ShowMessageBox('Please select created armature and mesh you wish to rig', "WARNING", 'ERROR')
         return {'FINISHED'}
-
