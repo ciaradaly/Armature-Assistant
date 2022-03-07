@@ -1,5 +1,6 @@
 from distutils.log import error
 from os import stat
+from pickle import TRUE
 import bpy
 import mathutils
 import numpy as np
@@ -37,6 +38,23 @@ def calculate_scd(mesh):
     linepts += datamean
     return linepts
     
+def add_bezier(v0 , v1):
+    o = (v1 + v0) / 2  
+    bpy.ops.curve.primitive_bezier_curve_add()
+    curve = bpy.context.view_layer.objects.active
+    # bpy.data.curves[bezCurve.name].splines[0].bezier_points[0].co
+    spline = bpy.data.curves[curve.name].splines[0]
+    bp0 = spline.bezier_points[0]
+    bp0.co = v0 - o
+    bp0.handle_left_type = bp0.handle_right_type = 'AUTO'
+
+    # spline.bezier_points.add(count=1)
+    bp1 = spline.bezier_points[1]
+    bp1.co = v1 - o
+    bp1.handle_left_type = bp1.handle_right_type = 'AUTO'
+    ob = bpy.data.curves.new('CURVE', curve)
+    ob.matrix_world.translation = o
+    return ob
 
 #Operates button functionalities on UI panel
 class ButtonOperator(Operator):
@@ -77,34 +95,40 @@ class ButtonOperator(Operator):
     @staticmethod
     def change_location(context):
         #Must have armature and mesh OBJECT selected
-        # Get location of points of mesh and perform
+        # Get location of points of mesh and perform Singular Value Decomposition
         for obj in bpy.context.selected_objects:
-            if obj.type != 'MESH':
-                toMove = obj
-            if obj.type == 'MESH':
+            if (obj.type == "CURVE"):
+                bezCurve = obj
+            if (obj.type == 'MESH'):
                 mesh = obj
-        #array filled with vector points
-        # vec = [v.co for v in mesh.data.vertices]
         vectors = calculate_scd(mesh)
-        # array[0] = mathutils.Vector((linepts[0][0],linepts[0][1],linepts[0][2]))
-        # array[1] = mathutils.Vector((linepts[1][0],linepts[1][1],linepts[1][2]))
         bpy.ops.object.empty_add(type='PLAIN_AXES')
-        obj = bpy.context.view_layer.objects.active
-        obj.location= mathutils.Vector((vectors[0][0],vectors[0][1],vectors[0][2]))
+        help1= bpy.context.view_layer.objects.active
+        point1= Vector((vectors[0][0],vectors[0][1],vectors[0][2]))
+        help1.location = point1
         bpy.ops.object.empty_add(type='PLAIN_AXES')
-        obj2 = bpy.context.view_layer.objects.active
-        obj2.location = mathutils.Vector((vectors[1][0],vectors[1][1],vectors[1][2]))
-        
-        # vec = mathutils.Vector(vec[1])
-        # print("vec=%s" % vec[:])
-        
-        # currently is capable of getting center of mass but too simple?
-        # bpy.context.scene.cursor_location = cg_mesh (bpy.context.scene.objects.active
-        # bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
-
-        # bpy.context.view_layer.objects.active = bpy.context.view_layer.objects.get(mesh.name)
-        # toMove.location = cg_mesh(bpy.context.view_layer.objects.active)
-        
+        help2= bpy.context.view_layer.objects.active
+        point2= Vector((vectors[1][0],vectors[1][1],vectors[1][2]))
+        help2.location = point2
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = bpy.context.view_layer.objects.get(bezCurve.name)
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True, properties=True)
+        #Take bezier curve end and beginning points and move their location to the generated vector points
+        bpy.ops.object.mode_set(mode='EDIT')
+        bpy.ops.curve.select_all(action='SELECT')
+        bpy.ops.curve.de_select_first()
+        bpy.ops.curve.de_select_last()
+        bpy.ops.curve.dissolve_verts()
+        print(point1)
+        bpy.data.curves[bezCurve.name].splines[0].bezier_points[0].co = point1 
+        bpy.data.curves[bezCurve.name].splines[0].bezier_points[1].co = point2
+        bpy.ops.curve.select_all(action='SELECT')
+        #This straightens out the curve
+        bpy.ops.curve.handle_type_set(type='VECTOR')
+        bpy.ops.curve.handle_type_set(type='ALIGNED')
+        bpy.context.space_data.region_3d.update()
+        bpy.ops.object.mode_set(mode='OBJECT')
+        # bezCurve.data.splines[0].bezier_points[0].location = point2.location
         
         return {'FINISHED'}
         
