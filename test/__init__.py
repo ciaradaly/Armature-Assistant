@@ -12,11 +12,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 bl_info = {
-    "name" : "Blender Plugin",
+    "name" : "Armature Plugin",
     "author" : "Ciara Daly",
-    "description" : "",
+    "description" : "Blender Plugin that assists with the simple creation and rigging of armatures",
     "blender" : (2, 80, 0),
-    "version" : (0, 0, 3),
+    "version" : (1, 0, 0),
     "location" : "View3D",
     "warning" : "",
     "category" : "Object"

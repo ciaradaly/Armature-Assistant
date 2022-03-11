@@ -14,7 +14,7 @@ def ShowMessageBox(message = "", title = "Message Box", icon = 'INFO'):
 class BASE_panel:
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Blender Plugin"
+    bl_category = "Armature Plugin"
     bl_options = {'DEFAULT_CLOSED'}
 
 
