@@ -1,2 +1,2 @@
-# blender_plugin
-Blender Python plugin app that I am working on across a few different machines
+# Armature Assistant
+Blender Python plugin that assists with the rigging of simple single appendage objects.
