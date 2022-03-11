@@ -15,7 +15,6 @@ class BASE_panel:
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "Blender Plugin"
-    # bl_context = "objectmode"
     bl_options = {'DEFAULT_CLOSED'}
 
 
@@ -31,12 +30,10 @@ class OBJECT_PT_ArmatureAssistantPanel(BASE_panel, Panel):
 
     def draw(self, context):
         
-        layout = self.layout # .operator("scene.button_operator")
-        #layout.prop(context.scene, "MyInt", slider=True)
-        
+        layout = self.layout 
         layout.operator('object.button_operator', text="Add new Bezier Curve", icon="CURVE_BEZCURVE").action='BEZIER_SPAWN'
         layout.label(text="Align curve to center of mesh")
-        layout.operator('object.button_operator', text="Align", icon="GRID").action='LOCATION'
+        layout.operator('object.button_operator', text="Align", icon="GRID").action='ALIGN'
         layout.label(text="Change Viewpoint:")
         layout.operator('object.button_operator', text="Top", icon="AXIS_TOP").action='VIEW_TOP'
         layout.operator('object.button_operator', text="Side", icon="AXIS_SIDE").action='VIEW_SIDE'
@@ -48,16 +45,6 @@ class OBJECT_PT_ArmatureAssistantPanel(BASE_panel, Panel):
         layout.operator('object.button_operator', text="Change Frequency", icon="GROUP_BONE").action='BONE_FREQ'
         layout.label(text="Select mesh and bone to rig:")
         layout.operator('object.button_operator', text="Rig", icon="ARMATURE_DATA").action='AUTO_RIG'
-
-        
-        # row = layout.row()
-        # col = row.column(align=True)
-        # layout.label(text="Location adjustment:")
-        # # col.label(text = str(obj.location))
-        # col = layout.column(align=True)
-        # col.operator(ButtonOperator.bl_idname, text="Change Location", icon="CONSOLE")
-        
-        # col.operator(ChangeViewpointOperator.bl_idname, text="Change ViewPoint", icon="CONSOLE")
 
 class OBJECT_PT_InfoPanel(BASE_panel, Panel):
     bl_parent_id = "OBJECT_PT_ArmatureAssistantPanel"
