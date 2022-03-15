@@ -4,7 +4,6 @@ from pickle import TRUE
 import bpy
 import mathutils
 import numpy as np
-import math
 
 from mathutils import Vector
 
@@ -36,7 +35,7 @@ def calculate_FPC(mesh):
     uu, dd, vv = np.linalg.svd(data - datamean)
     min = f.min()
     max = f.max()
-    linepts = vv[0] * np.mgrid[min:max:2j][:, np.newaxis]
+    linepts = vv[0] * np.mgrid[6:-6:2j][:, np.newaxis]
     linepts += datamean
     return linepts
 
@@ -133,12 +132,12 @@ class ButtonOperator(Operator):
     #Spawns in a 'Straight' Bezier Curve at position (0,0,0) for ease of manipulation
     def bezier_spawn(context):
         bpy.ops.curve.primitive_bezier_curve_add(enter_editmode=True,scale=(0, 0, 0))
-        bpy.ops.object.mode_set(mode='EDIT')
-        # bpy.ops.object.select_all(action='DESELECT')
-        # bezier_curves = bpy.context.view_layer.objects.active
-        #https://blender.stackexchange.com/questions/145857/how-do-i-apply-delta-transforms-to-normal-transform
-        for obj in bpy.context.selected_objects:
-            obj.delta_scale = (1,0,1)
+        # bpy.ops.object.mode_set(mode='EDIT')
+        # # bpy.ops.object.select_all(action='DESELECT')
+        # # bezier_curves = bpy.context.view_layer.objects.active
+        # #https://blender.stackexchange.com/questions/145857/how-do-i-apply-delta-transforms-to-normal-transform
+        # for obj in bpy.context.selected_objects:
+        #     obj.delta_scale = (1,0,1)
         bpy.ops.object.mode_set(mode='OBJECT')
         return {'FINISHED'}
 
@@ -226,15 +225,17 @@ class ButtonOperator(Operator):
             bpy.ops.object.mode_set(mode='POSE')
             bpy.ops.pose.group_deselect()
             if(len(created_bones.data.bones)!=1):
+                influenceBone = 0.85
                 myPoseBone = bpy.data.objects[created_bones.name].pose.bones['Bone.001']
             else :
+                influenceBone = 0.95
                 myPoseBone = bpy.data.objects[created_bones.name].pose.bones['Bone.00']
             bpy.context.object.data.bones.active = myPoseBone.bone
             myPoseBone.bone.select = True
             bpy.context.space_data.region_3d.update()
             const = myPoseBone.constraints.new("SPLINE_IK")
             const.target = bpy.context.scene.objects[curveBez.name]
-            const.influence = 0.85
+            const.influence = influenceBone
             const.chain_count = len(created_bones.data.bones)
             bpy.ops.object.mode_set(mode='OBJECT') 
             bpy.context.view_layer.objects.active = bpy.context.view_layer.objects.get(created_bones.name)
