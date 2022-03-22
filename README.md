@@ -9,7 +9,7 @@ Blender Python plugin that assists with the rigging of simple single appendage o
 
 ## Installation Steps
 
-1. Download the source code from https://github.com/ciaradaly/Armature-Assistant/releases/tag/v1.0.0 and extract it to some folder on your local device
+1. Download the source code from https://github.com/ciaradaly/Armature-Assistant/releases/tag/v1.0.1 and extract it to some folder on your local device
 2.	Copy the `/test` folder and prepare to move it to a new location
 3.	Find your Blender `addons` folder. This generally follows the path `(where you installed blender)/Blender Foundation/Blender 2.75/2.75/scripts/addons`
 4.	Copy the `/test` folder from Armature-Assistant to the addons folder
