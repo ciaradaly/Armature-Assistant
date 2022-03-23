@@ -5,6 +5,10 @@
 
 Blender Python plugin that assists with the rigging of simple single appendage objects. Designed as a project for Final Year in a multimedia, web and mobile degree. Written in Python.
 
+Blender is a free open-source software platform for creating and manipulating 3D-models. Blender includes extensive functionality for animation, rendering, 3D-model editing and more. Despite its many uses, the functionality it provides can be complicated to use. Many features are not well documented, and it can be difficult for new users to implement complex procedures. The creation and rigging of armatures to a mesh can be particularly complicated. The “Armature Assistant Plugin” aims to provide a simple and usable interface in which a user can create, manipulate, and rig a limbless vertebrate such as a snake or fish. Beginners and advanced users alike can use the plugin to simplify the tasks presented in rigging models, as well as save time on lengthy tasks such as armature creation. This easy-to-read built-in plugin allows a novice Blender artist to utilize the many functionalities of 3D modelling that Blender provides without requiring the in-depth knowledge that a beginner may need.
+ 
+
+
 * Project status: Prototype
 
 ## Installation Steps
