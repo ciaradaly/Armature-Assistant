@@ -35,6 +35,7 @@ def calculate_FPC(mesh):
     uu, dd, vv = np.linalg.svd(data - datamean)
     min = f.min()
     max = f.max()
+    #min and max were de-commissioned as they were presenting bug issues.
     linepts = vv[0] * np.mgrid[6:-6:2j][:, np.newaxis]
     linepts += datamean
     return linepts
@@ -78,7 +79,7 @@ class ButtonOperator(Operator):
     @staticmethod
     def align(context):
         #Must have armature and mesh OBJECT selected
-        # Get location of points of mesh and perform Singular Value Decomposition
+        #Get location of points of mesh and perform Singular Value Decomposition
         try:
             for obj in bpy.context.selected_objects:
                 if (obj.type == "CURVE"):
@@ -132,12 +133,6 @@ class ButtonOperator(Operator):
     #Spawns in a 'Straight' Bezier Curve at position (0,0,0) for ease of manipulation
     def bezier_spawn(context):
         bpy.ops.curve.primitive_bezier_curve_add(enter_editmode=True,scale=(0, 0, 0))
-        # bpy.ops.object.mode_set(mode='EDIT')
-        # # bpy.ops.object.select_all(action='DESELECT')
-        # # bezier_curves = bpy.context.view_layer.objects.active
-        # #https://blender.stackexchange.com/questions/145857/how-do-i-apply-delta-transforms-to-normal-transform
-        # for obj in bpy.context.selected_objects:
-        #     obj.delta_scale = (1,0,1)
         bpy.ops.object.mode_set(mode='OBJECT')
         return {'FINISHED'}
 
@@ -145,8 +140,6 @@ class ButtonOperator(Operator):
     #What it says on the tin: creates armature out of a using a bezier curve as a base
     def bone_creator(context):
         context = bpy.context
-        # arm_base = context.object
-        # bone_base = arm_base.data
         curve = bpy.context.view_layer.objects.active
         #checks to see if selected object is a bezier curve
         if (curve.type == "CURVE"):
@@ -196,10 +189,10 @@ class ButtonOperator(Operator):
         scene = context.scene
         amount_of_bones = scene.Bones
         obj = bpy.context.view_layer.objects.active
-        #Maybe update this not to require curve? But use curve if its selected.
         if (obj.type == "ARMATURE"):
             created_bones = bpy.context.view_layer.objects.active
             bpy.ops.object.mode_set(mode='EDIT')
+            # Iterates through all bones and removes the SPLINE_IK constraint
             for num in range(len(created_bones.data.bones)):
                 if num > 0:
                     #three letter format is f'{num:03}'
@@ -218,12 +211,14 @@ class ButtonOperator(Operator):
                             if c.type == "SPLINE_IK":
                                 curveBez = c.target
                             first_bone.remove(c)
+            #subdividing bones to amount of cuts specified on the slider
             bpy.ops.armature.select_all(action='SELECT')
             bpy.ops.armature.dissolve()
             if amount_of_bones > 0:
                 bpy.ops.armature.subdivide(number_cuts=amount_of_bones-1)
             bpy.ops.object.mode_set(mode='POSE')
             bpy.ops.pose.group_deselect()
+            #End bones name is 'Bone.001' is there is more than one bone. Otherwise it is known as 'Bone.00'.
             if(len(created_bones.data.bones)!=1):
                 influenceBone = 0.85
                 myPoseBone = bpy.data.objects[created_bones.name].pose.bones['Bone.001']
@@ -233,6 +228,7 @@ class ButtonOperator(Operator):
             bpy.context.object.data.bones.active = myPoseBone.bone
             myPoseBone.bone.select = True
             bpy.context.space_data.region_3d.update()
+            #adding constraint to end bone
             const = myPoseBone.constraints.new("SPLINE_IK")
             const.target = bpy.context.scene.objects[curveBez.name]
             const.influence = influenceBone
